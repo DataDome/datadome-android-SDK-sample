@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">DataDomeSDKExample</string>
+    <string name="switch_user_agent">Switch UserAgent</string>
+    <string name="make_a_request">Request</string>
+    <string name="clear_cache">Clear cache</string>
+    <string name="current_useragent">Current UserAgent:</string>
+    <string name="use_custom_network_layer">User DataDome network layer</string>
+    <string name="blockua">BLOCKUA</string>
+    <string name="several_requests">Several requests</string>
+    <string name="back_behaviour">captcha back behaviour</string>
+</resources>
