@@ -2,6 +2,7 @@ package com.example.datadomesdkexample
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -28,6 +29,7 @@ import java.util.HashMap
 class MainActivity: AppCompatActivity() {
 
     companion object {
+        lateinit var dataDomeSdk: DataDomeSDK.Builder
         private val TAG = MainActivity::class.java.simpleName
         private val BLOCKUA = "BLOCKUA"
         private val ALLOWUA =
@@ -35,7 +37,7 @@ class MainActivity: AppCompatActivity() {
     }
 
     private lateinit var userAgent: String
-    private var dataDomeSdk: DataDomeSDK.Builder? = null
+    //private var dataDomeSdk: DataDomeSDK.Builder? = null
 
     private var dataDomeSDKManualIntegrationListener: DataDomeSDKManualIntegrationListener = object: DataDomeSDKManualIntegrationListener() {
         private val MANUALTAG = "MANUAL " + MainActivity::class.java.simpleName
@@ -118,6 +120,12 @@ class MainActivity: AppCompatActivity() {
         ActivityCompat.requestPermissions(this, arrayOf<String>(Manifest.permission.CAMERA), 101)
 
         _clearCache()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val cookieValue = dataDomeSdk.cookie
+        Log.d("cookie value", "dataDomeSdk cookie: $cookieValue")
     }
 
     fun switchUserAgent(v: View) {
@@ -343,6 +351,12 @@ class MainActivity: AppCompatActivity() {
         for (i in 1..numberOfRequest) {
             manualRequest(i)
         }
+    }
+
+    fun clickOnOpenWebviewButton(v: View) {
+        val intent = Intent(this, WebviewPage::class.java)
+        dataDomeSdk.cookie = "cookie to inject in webview"
+        startActivity(intent)
     }
 }
 
