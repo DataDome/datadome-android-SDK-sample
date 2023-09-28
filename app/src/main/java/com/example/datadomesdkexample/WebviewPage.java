@@ -24,7 +24,6 @@ public class WebviewPage extends AppCompatActivity {
         webview.getSettings().getJavaScriptEnabled();
         webview.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         CookieManager.getInstance().removeAllCookie();
-        webview.getSettings().setUserAgentString("BLOCKUA");
         String url = "testing_url";
         String cookie = MainActivity.dataDomeSdk.getCookie();
         CookieManager.getInstance().setCookie(domain, "datadome="+cookie);
@@ -39,6 +38,7 @@ public class WebviewPage extends AppCompatActivity {
         MainActivity.dataDomeSdk.setCookie(datadomeCookie);
     }
 
+    // Retrieve Datadome cookie from CookieManager cookies
     private String filterDatadomeCookie(String cookie) {
         String cookieName = "datadome=";
         String[] cookieSplit = cookie.split(cookieName);
