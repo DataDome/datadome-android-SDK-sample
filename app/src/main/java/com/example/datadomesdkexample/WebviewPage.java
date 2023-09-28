@@ -27,15 +27,27 @@ public class WebviewPage extends AppCompatActivity {
         webview.getSettings().setUserAgentString("BLOCKUA");
         String url = "testing_url";
         String cookie = MainActivity.dataDomeSdk.getCookie();
-        CookieManager.getInstance().setCookie(domain, cookie);
+        CookieManager.getInstance().setCookie(domain, "datadome="+cookie);
         webview.loadUrl(url);
-        String wvCookie = CookieManager.getInstance().getCookie(domain);
-        Log.d("cookie value", "webview cookie value: "+wvCookie);
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        MainActivity.dataDomeSdk.setCookie("cookie to inject into MainActivity");
+        String cookies = CookieManager.getInstance().getCookie(domain);
+        String datadomeCookie = filterDatadomeCookie(cookies);
+        MainActivity.dataDomeSdk.setCookie(datadomeCookie);
+    }
+
+    private String filterDatadomeCookie(String cookie) {
+        String cookieName = "datadome=";
+        String[] cookieSplit = cookie.split(cookieName);
+        if (cookieSplit.length > 1) {
+            if (cookieSplit[1].contains(";")) {
+                return cookieName+cookieSplit[1].split(";")[0];
+            }
+            return cookieName+cookieSplit[1];
+        }
+        return "";
     }
 }
