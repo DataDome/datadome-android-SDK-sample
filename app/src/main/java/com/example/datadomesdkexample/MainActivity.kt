@@ -2,6 +2,7 @@ package com.example.datadomesdkexample
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -28,6 +29,7 @@ import java.util.HashMap
 class MainActivity: AppCompatActivity() {
 
     companion object {
+        lateinit var dataDomeSdk: DataDomeSDK.Builder
         private val TAG = MainActivity::class.java.simpleName
         private val BLOCKUA = "BLOCKUA"
         private val ALLOWUA =
@@ -35,7 +37,7 @@ class MainActivity: AppCompatActivity() {
     }
 
     private lateinit var userAgent: String
-    private var dataDomeSdk: DataDomeSDK.Builder? = null
+    //private var dataDomeSdk: DataDomeSDK.Builder? = null
 
     private var dataDomeSDKManualIntegrationListener: DataDomeSDKManualIntegrationListener = object: DataDomeSDKManualIntegrationListener() {
         private val MANUALTAG = "MANUAL " + MainActivity::class.java.simpleName
@@ -118,6 +120,12 @@ class MainActivity: AppCompatActivity() {
         ActivityCompat.requestPermissions(this, arrayOf<String>(Manifest.permission.CAMERA), 101)
 
         _clearCache()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val cookieValue = dataDomeSdk.cookie
+        Log.d("cookie value", "dataDomeSdk cookie: $cookieValue")
     }
 
     fun switchUserAgent(v: View) {
@@ -222,10 +230,10 @@ class MainActivity: AppCompatActivity() {
                         }
 
                         override fun onResponse(call: Call, response: Response) {
-                            Log.d(TAG,"Task $customText -> ${response.code()}")
+                            Log.d(TAG,"Task $customText -> ${response.code}")
                             if (contextForToast != null)
                                 (contextForToast as? MainActivity)?.runOnUiThread {
-                                    Toast.makeText(contextForToast, "Task $customText response : ${response.code()}", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(contextForToast, "Task $customText response : ${response.code}", Toast.LENGTH_SHORT).show()
                                 }
                         }
                     }
@@ -244,11 +252,11 @@ class MainActivity: AppCompatActivity() {
 
     private val UTF8 = Charset.forName("UTF-8")
     private fun handleBlockedResponse(response: Response, idToRedo: Int?) {
-        val responseBody = response.body() ?: return
-        val request = response.request()
+        val responseBody = response.body ?: return
+        val request = response.request
         val userAgent = request.header("User-Agent")
         val headers = HashMap<String, String>()
-        val responseHeaders = response.headers()
+        val responseHeaders = response.headers
         val headersNames = responseHeaders.names()
         for (name in headersNames) {
             val value = responseHeaders.get(name)
@@ -280,16 +288,16 @@ class MainActivity: AppCompatActivity() {
         if (charset != null) {
             val content = buffer.readString(charset)
             buffer.close()
-            dataDomeSdk?.handleResponse(idToRedo, headers, response.code(), content)
+            dataDomeSdk?.handleResponse(idToRedo, headers, response.code, content)
             return
         } else {
             buffer.close()
         }
-        dataDomeSdk?.handleResponse(idToRedo, headers, response.code(), "")
+        dataDomeSdk?.handleResponse(idToRedo, headers, response.code, "")
     }
 
     fun manualRequest(idToRedo: Int?) {
-        val endpoint = Helper.getConfigValue(this, "datadome.endpoint")
+        val endpoint = Helper.getConfigValue(this, "datadome.endpoint") ?: ""
         val builder = OkHttpClient.Builder()
         var headers = HashMap<String, String>()
 
@@ -316,7 +324,7 @@ class MainActivity: AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 val headers = HashMap<String, String>()
-                val responseHeaders = response.headers()
+                val responseHeaders = response.headers
                 val headersNames = responseHeaders.names()
                 for (name in headersNames) {
                     val value = responseHeaders.get(name)
@@ -325,8 +333,8 @@ class MainActivity: AppCompatActivity() {
                     }
                 }
 
-                val url = call.request().url().toString()
-                if (dataDomeSdk?.verifyResponse(url, headers, response.code(), applicationContext) != false) {
+                val url = call.request().url.toString()
+                if (dataDomeSdk?.verifyResponse(url, headers, response.code) != false) {
                     Log.d("Manual response", "Response handle")
                     handleBlockedResponse(response, idToRedo)
                 } else {
@@ -343,6 +351,11 @@ class MainActivity: AppCompatActivity() {
         for (i in 1..numberOfRequest) {
             manualRequest(i)
         }
+    }
+
+    fun clickOnOpenWebviewButton(v: View) {
+        val intent = Intent(this, WebviewPage::class.java)
+        startActivity(intent)
     }
 }
 
